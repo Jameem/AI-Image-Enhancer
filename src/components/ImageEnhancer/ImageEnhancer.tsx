@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState } from 'react';
 
 import './styles.css';
 import { Footer } from './Footer';
@@ -9,20 +9,20 @@ import { enhance } from '../../utils/enhancer';
 export interface IImageEnhancerProps {}
 
 export function ImageEnhancer(props: IImageEnhancerProps) {
-  const [imageFile, setImageFile] = React.useState<File | undefined>();
-  const [imageEnhanced, setImageEnhanced] = React.useState<
-    string | undefined
-  >();
-  const [isUploading, setIsUploading] = React.useState(false);
-  const [isEnhancing, setIsEnhancing] = React.useState(false);
+  const [imageFile, setImageFile] = useState<File | undefined>();
+  const [imageEnhanced, setImageEnhanced] = useState<string | undefined>();
+  const [isUploading, setIsUploading] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
   const [enhancementProperty, setEnhancementProperty] =
-    React.useState<EnhanceProperty>('UPSCALE');
+    useState<EnhanceProperty>('UPSCALE');
+  const [error, setError] = useState('');
 
   const onUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e?.target?.files?.length) {
       return;
     }
 
+    clearError();
     setIsUploading(true);
     setImageFile(e.target.files[0]);
     setIsUploading(false);
@@ -33,45 +33,27 @@ export function ImageEnhancer(props: IImageEnhancerProps) {
       return;
     }
 
+    clearError();
     setIsEnhancing(true);
-
-    let enhancedImage;
-
-    switch (enhancementProperty) {
-      case 'UPSCALE':
-        enhancedImage = await enhance('UPSCALE', imageFile);
-        break;
-      case 'DEBLUR':
-        enhancedImage = await enhance('DEBLUR', imageFile);
-        break;
-      case 'DENOISE':
-        enhancedImage = await enhance('DENOISE', imageFile);
-        break;
-      case 'LOWLIGHT':
-        enhancedImage = await enhance('LOWLIGHT', imageFile);
-        break;
-      case 'RETOUCH':
-        enhancedImage = await enhance('RETOUCH', imageFile);
-        break;
-      case 'DERAIN':
-        enhancedImage = await enhance('DERAIN', imageFile);
-        break;
-      case 'DEHAZEINDOOR':
-        enhancedImage = await enhance('DEHAZEINDOOR', imageFile);
-        break;
-      case 'DEHAZEOUTDOOR':
-        enhancedImage = await enhance('DEHAZEOUTDOOR', imageFile);
-        break;
-    }
-
-    if (enhancedImage) {
-      setImageEnhanced(enhancedImage);
+    const result = await enhance(enhancementProperty, imageFile);
+    if (!result || !result.data?.image) {
+      setError('Uh-oh. Something went wrong. Please try again!');
       setIsEnhancing(false);
+      return;
     }
+
+    setImageEnhanced(result.data?.image);
+    setIsEnhancing(false);
   };
 
   const onChangeProperty = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setEnhancementProperty(e.target.value as EnhanceProperty);
+  };
+
+  const clearError = () => {
+    if (error) {
+      setError('');
+    }
   };
 
   return (
@@ -93,6 +75,7 @@ export function ImageEnhancer(props: IImageEnhancerProps) {
           loadingText='Enhancing the image...'
         />
       </div>
+      {error && <div className='error'>{error}</div>}
       <ImageUpload
         onChange={onUpload}
         onChangeProperty={onChangeProperty}
