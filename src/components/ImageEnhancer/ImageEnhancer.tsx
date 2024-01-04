@@ -36,13 +36,13 @@ export function ImageEnhancer(props: IImageEnhancerProps) {
     clearError();
     setIsEnhancing(true);
     const result = await enhance(enhancementProperty, imageFile);
-    if (!result || !result.data?.image) {
+    if (!result || !result.image) {
       setError('Uh-oh. Something went wrong. Please try again!');
       setIsEnhancing(false);
       return;
     }
 
-    setImageEnhanced(result.data?.image);
+    setImageEnhanced(result.image);
     setIsEnhancing(false);
   };
 

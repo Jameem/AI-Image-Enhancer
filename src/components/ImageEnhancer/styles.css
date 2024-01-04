@@ -38,6 +38,25 @@
 .image-preview-wrapper {
   display: flex;
   gap: 100px;
+  flex-direction: row;
+}
+
+@media only screen and (max-width: 1240px) {
+  .image-preview-wrapper {
+    flex-direction: column;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .image-wrapper .image img {
+    width: 400px;
+  }
+}
+
+@media only screen and (max-width: 620px) {
+  .header {
+    font-size: 53px;
+  }
 }
 
 .upload-wrapper {
